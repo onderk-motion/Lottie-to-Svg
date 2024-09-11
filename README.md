@@ -3,6 +3,6 @@
 
 Hi, I'm Onder and I'm a Freelance Sr. Motion Designer and Content creator.
 
-I created Lottie to Svg converter with choose frame option
+This tool converts Lottie JSON animations into SVG files, allowing users to select and export specific frames as SVG images.
 
 ![user-interface](https://github.com/user-attachments/assets/cbc8dbfe-b42f-404d-9f35-1744464043b4)
