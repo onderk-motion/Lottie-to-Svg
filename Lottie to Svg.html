@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottie to SVG Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        #lottie-container {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #file-input, #frame-select, #convert-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        #convert-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #convert-btn:hover {
+            background-color: #45a049;
+        }
+        #convert-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #svg-output {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ccc;
+            overflow: auto;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lottie to SVG Converter</h1>
+        <input type="file" id="file-input" accept=".json">
+        <div id="lottie-container"></div>
+        <select id="frame-select" disabled>
+            <option value="">Select a frame</option>
+        </select>
+        <button id="convert-btn" disabled>Convert and Save SVG</button>
+        <div id="svg-output"></div>
+    </div>
+    <script>
+        let animation;
+        let sourceFileName;
+        const fileInput = document.getElementById('file-input');
+        const convertBtn = document.getElementById('convert-btn');
+        const container = document.getElementById('lottie-container');
+        const svgOutput = document.getElementById('svg-output');
+        const frameSelect = document.getElementById('frame-select');
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                sourceFileName = file.name.split('.')[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const animationData = JSON.parse(e.target.result);
+                        if (animation) {
+                            animation.destroy();
+                        }
+                        animation = lottie.loadAnimation({
+                            container: container,
+                            renderer: 'svg',
+                            loop: true,
+                            autoplay: true,
+                            animationData: animationData
+                        });
+
+                        // Populate frame select
+                        frameSelect.innerHTML = '<option value="">Select a frame</option>';
+                        for (let i = 0; i < animation.totalFrames; i++) {
+                            const option = document.createElement('option');
+                            option.value = i;
+                            option.textContent = `Frame ${i + 1}`;
+                            frameSelect.appendChild(option);
+                        }
+                        frameSelect.disabled = false;
+                        convertBtn.disabled = false;
+                    } catch (error) {
+                        console.error('Error parsing JSON:', error);
+                        alert('Error parsing JSON file. Please check if the file is valid.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        frameSelect.addEventListener('change', (event) => {
+            if (animation && event.target.value !== "") {
+                animation.goToAndStop(parseInt(event.target.value), true);
+            }
+        });
+
+        convertBtn.addEventListener('click', () => {
+            if (animation) {
+                const svg = container.querySelector('svg');
+                if (svg) {
+                    const svgContent = svg.outerHTML;
+                    svgOutput.textContent = svgContent;
+
+                    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const selectedFrame = frameSelect.value ? `_frame${parseInt(frameSelect.value) + 1}` : '';
+                    a.download = `${sourceFileName}${selectedFrame}.svg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    alert(`SVG file has been saved as ${sourceFileName}${selectedFrame}.svg and the content is displayed below.`);
+                } else {
+                    console.error('No SVG element found');
+                    alert('Error: No SVG element found');
+                }
+            } else {
+                console.error('No animation loaded');
+                alert('Error: No animation loaded');
+            }
+        });
+    </script>
+</body>
+</html>
