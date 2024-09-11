@@ -1,1 +1,0 @@
-# Lottie-to-Svg
