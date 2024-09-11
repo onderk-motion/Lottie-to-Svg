@@ -7,6 +7,3 @@ This tool converts Lottie JSON animations into SVG files, allowing users to sele
 
 
 ![Frame 1](https://github.com/user-attachments/assets/82eb4f73-060d-49e2-9727-ad2d526b9c0f)
-
-
-![user-interface](https://github.com/user-attachments/assets/cbc8dbfe-b42f-404d-9f35-1744464043b4)
